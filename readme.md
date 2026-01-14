@@ -2,7 +2,7 @@
 
 A modern, production-grade e-commerce storefront built with **React 18**, **TypeScript**, and **Medusa.js** as the headless commerce backend.
 
-![Products Page](/Users/prathamsrivastava/.gemini/antigravity/brain/bfdc780b-9470-404c-ad9f-7a04781a3aac/products_page_working_1768396619445.png)
+![Homepage](docs/homepage-screenshot.png)
 
 ## ✨ Features
 
@@ -11,6 +11,7 @@ A modern, production-grade e-commerce storefront built with **React 18**, **Type
 - **Shopping Cart** - Add/remove items, update quantities, persistent cart state
 - **Region Support** - Multi-currency support based on selected region
 - **Modern UI** - Clean black & white theme with smooth animations
+- **CI/CD** - GitHub Actions for linting, building, and deployment
 
 ## 🛠️ Tech Stack
 
