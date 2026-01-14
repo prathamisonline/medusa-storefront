@@ -1,0 +1,50 @@
+.card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    transition: all 0.3s ease;
+}
+
+.card-hoverable {
+    cursor: pointer;
+}
+
+.card-hoverable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    border-color: var(--color-primary);
+}
+
+.card-image {
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-surface-hover);
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.card-hoverable:hover .card-image img {
+    transform: scale(1.05);
+}
+
+.card-image-square {
+    aspect-ratio: 1;
+}
+
+.card-image-landscape {
+    aspect-ratio: 16 / 9;
+}
+
+.card-image-portrait {
+    aspect-ratio: 3 / 4;
+}
+
+.card-content {
+    padding: 1rem;
+}
