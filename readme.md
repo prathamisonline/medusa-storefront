@@ -2,7 +2,7 @@
 
 A modern, production-grade e-commerce storefront built with **React 18**, **TypeScript**, and **Medusa.js** as the headless commerce backend.
 
-![Homepage](docs/homepage-screenshot.png)
+![Homepage](docs/homepage-screenshot.png?v=2)
 
 ## ✨ Features
 
