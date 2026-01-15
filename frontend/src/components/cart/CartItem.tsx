@@ -11,7 +11,6 @@ interface CartItemProps {
 
 export const CartItem = ({ item }: CartItemProps) => {
     const { removeItem, updateItemQuantity, isItemUpdating } = useCartState();
-    console.log("CartItem item:", JSON.stringify(item, null, 2));
 
     const isUpdating = isItemUpdating(item.id);
 
