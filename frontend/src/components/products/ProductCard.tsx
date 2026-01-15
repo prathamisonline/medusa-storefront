@@ -38,7 +38,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                         <p className="product-subtitle">{product.subtitle}</p>
                     )}
                     {lowestPrice !== null && (
-                        <Price amount={lowestPrice} showFrom={!!(product.variants && product.variants.length > 1)} />
+                        <div style={{ marginTop: "auto" }}>
+                            <Price amount={lowestPrice} showFrom={!!(product.variants && product.variants.length > 1)} />
+                        </div>
                     )}
                 </CardContent>
             </Card>

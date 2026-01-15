@@ -4,6 +4,9 @@
     overflow: hidden;
     border: 1px solid var(--color-border);
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .card-hoverable {
@@ -47,4 +50,7 @@
 
 .card-content {
     padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }

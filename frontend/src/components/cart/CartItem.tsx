@@ -10,7 +10,10 @@ interface CartItemProps {
 }
 
 export const CartItem = ({ item }: CartItemProps) => {
-    const { removeItem, updateItemQuantity, isUpdating } = useCartState();
+    const { removeItem, updateItemQuantity, isItemUpdating } = useCartState();
+    console.log("CartItem item:", JSON.stringify(item, null, 2));
+
+    const isUpdating = isItemUpdating(item.id);
 
     const handleRemove = () => {
         removeItem(item.id);
@@ -34,8 +37,18 @@ export const CartItem = ({ item }: CartItemProps) => {
 
             <div className="cart-item-details">
                 <h4 className="cart-item-title">{item.title}</h4>
-                {item.variant?.title && item.variant.title !== "Default variant" && (
-                    <p className="cart-item-variant">{item.variant.title}</p>
+                {(item.variant_title || item.variant?.title) && (
+                    <div className="cart-item-variant-info">
+                        {item.variant_title && item.variant_title !== "Default variant" ? (
+                            <p className="cart-item-variant">{item.variant_title}</p>
+                        ) : item.variant?.title && item.variant.title !== "Default variant" ? (
+                            <p className="cart-item-variant">{item.variant.title}</p>
+                        ) : item.variant?.options && item.variant.options.length > 0 ? (
+                            <p className="cart-item-variant-options">
+                                {item.variant.options.map((opt: any) => opt.value).join(" / ")}
+                            </p>
+                        ) : null}
+                    </div>
                 )}
                 <Price amount={item.unit_price || 0} />
             </div>

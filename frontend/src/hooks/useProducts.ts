@@ -5,6 +5,7 @@ import { sdk } from "../lib/sdk";
 type UseProductsOptions = {
     limit?: number;
     initialOffset?: number;
+    regionId?: string;
 };
 
 type UseProductsReturn = {
@@ -19,7 +20,7 @@ type UseProductsReturn = {
 export const useProducts = (
     options: UseProductsOptions = {}
 ): UseProductsReturn => {
-    const { limit = 12, initialOffset = 0 } = options;
+    const { limit = 12, initialOffset = 0, regionId } = options;
 
     const [products, setProducts] = useState<HttpTypes.StoreProduct[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,8 @@ export const useProducts = (
                     await sdk.store.product.list({
                         limit,
                         offset: currentOffset,
+                        region_id: regionId,
+                        ...(regionId ? { fields: "*variants.calculated_price" } : {}),
                     });
 
                 setProducts((prev) => {
@@ -55,12 +58,12 @@ export const useProducts = (
                 setIsLoading(false);
             }
         },
-        [limit]
+        [limit, regionId]
     );
 
     useEffect(() => {
         fetchProducts(initialOffset, true);
-    }, [fetchProducts, initialOffset]);
+    }, [fetchProducts, initialOffset, regionId]);
 
     const loadMore = useCallback(() => {
         if (isLoading || !hasMore) return;

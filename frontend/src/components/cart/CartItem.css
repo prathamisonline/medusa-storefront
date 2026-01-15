@@ -35,9 +35,17 @@
     color: var(--color-text);
 }
 
-.cart-item-variant {
-    font-size: 0.875rem;
+.cart-item-variant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.cart-item-variant,
+.cart-item-variant-options {
+    font-size: 0.8125rem;
     color: var(--color-text-muted);
+    text-transform: capitalize;
 }
 
 .cart-item-actions {

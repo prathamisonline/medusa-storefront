@@ -13,11 +13,13 @@ export const ProductDetail = () => {
     const { id } = useParams<{ id: string }>();
     const { region } = useRegion();
     const { product, isLoading, error } = useProduct(id, region?.id);
-    const { addItem, isUpdating } = useCartState();
+    const { addItem } = useCartState();
 
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
 
     if (isLoading) {
         return (
@@ -44,7 +46,7 @@ export const ProductDetail = () => {
     const variants = product.variants || [];
     const selectedVariant = variants[selectedVariantIndex];
     const images = product.images || [];
-    const mainImage = images[0]?.url || product.thumbnail || "/placeholder-product.png";
+    const mainImage = images[activeImageIndex]?.url || product.thumbnail || "/placeholder-product.png";
 
     // Get price from variant - check multiple possible locations
     const getVariantPrice = () => {
@@ -67,14 +69,21 @@ export const ProductDetail = () => {
     const price = getVariantPrice();
 
     const handleAddToCart = async () => {
-        if (!selectedVariant) return;
+        if (!selectedVariant) {
+            alert("Please select a variant");
+            return;
+        }
 
+        setIsAdding(true);
         try {
             await addItem(selectedVariant.id, quantity);
             setIsAdded(true);
             setTimeout(() => setIsAdded(false), 2000);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to add to cart:", error);
+            alert("Failed to add to cart: " + (error.message || "Unknown error"));
+        } finally {
+            setIsAdding(false);
         }
     };
 
@@ -97,7 +106,11 @@ export const ProductDetail = () => {
                     {images.length > 1 && (
                         <div className="image-thumbnails">
                             {images.slice(0, 4).map((image, index) => (
-                                <div key={image.id || index} className="thumbnail">
+                                <div
+                                    key={image.id || index}
+                                    className={`thumbnail ${activeImageIndex === index ? "active" : ""}`}
+                                    onClick={() => setActiveImageIndex(index)}
+                                >
                                     <img src={image.url} alt={`${product.title} ${index + 1}`} />
                                 </div>
                             ))}
@@ -165,7 +178,7 @@ export const ProductDetail = () => {
                     <Button
                         size="lg"
                         onClick={handleAddToCart}
-                        isLoading={isUpdating}
+                        isLoading={isAdding}
                         className={`add-to-cart-btn ${isAdded ? "added" : ""}`}
                     >
                         {isAdded ? (

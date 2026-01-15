@@ -41,9 +41,15 @@ export const Cart = () => {
 
             <div className="cart-layout">
                 <div className="cart-items">
-                    {cart.items?.map((item) => (
-                        <CartItem key={item.id} item={item} />
-                    ))}
+                    {cart.items?.slice()
+                        .sort((a, b) => {
+                            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                            return dateA - dateB;
+                        })
+                        .map((item) => (
+                            <CartItem key={item.id} item={item} />
+                        ))}
                 </div>
 
                 <aside className="cart-sidebar">

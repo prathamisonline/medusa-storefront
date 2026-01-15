@@ -57,6 +57,8 @@ export function StateInitializer({ children }: StateInitializerProps) {
             const cartId = localStorage.getItem("cart_id");
 
             try {
+                if (!region) return;
+
                 if (!cartId) {
                     const { cart: newCart } = await sdk.store.cart.create({
                         region_id: region.id,

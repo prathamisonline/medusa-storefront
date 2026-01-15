@@ -13,9 +13,9 @@ export const cartLoadingAtom = atom<boolean>({
     default: true,
 });
 
-export const cartUpdatingAtom = atom<boolean>({
+export const cartUpdatingAtom = atom<string[]>({
     key: "cartUpdating",
-    default: false,
+    default: [],
 });
 
 // Selector for item count
@@ -31,7 +31,7 @@ export const cartItemCountSelector = selector<number>({
 export const useCartState = () => {
     const [cart, setCart] = useRecoilState(cartAtom);
     const [isLoading, setIsLoading] = useRecoilState(cartLoadingAtom);
-    const [isUpdating, setIsUpdating] = useRecoilState(cartUpdatingAtom);
+    const [updatingItems, setUpdatingItems] = useRecoilState(cartUpdatingAtom);
     const itemCount = useRecoilValue(cartItemCountSelector);
 
     const fetchCart = async (regionId: string) => {
@@ -45,7 +45,9 @@ export const useCartState = () => {
                 localStorage.setItem("cart_id", newCart.id);
                 setCart(newCart);
             } else {
-                const { cart: existingCart } = await sdk.store.cart.retrieve(cartId);
+                const { cart: existingCart } = await sdk.store.cart.retrieve(cartId, {
+                    fields: "+items.variant,+items.variant.options,+items.variant.product.images,+items.product.images",
+                });
                 setCart(existingCart);
             }
         } catch (error) {
@@ -68,56 +70,71 @@ export const useCartState = () => {
     const addItem = async (variantId: string, quantity: number) => {
         if (!cart) return;
 
-        setIsUpdating(true);
+        // For adding, we don't have a line item ID yet, so we can't be granular
+        // We could just rely on the count increasing or something, but usually adding is global loading
+        // or we could use a dummy ID like "adding" if we wanted.
+        // For now, let's just leave it silent or use a global loading indicator if needed elsewhere.
+        // But the previous code used isUpdating global.
+        // Let's use a special key for adding to disable checkout or something if we check it.
+        // But re-reading the user complaint: it is about flickering when changing quantity.
+        // So for add item, we can proceed.
         try {
             const { cart: updatedCart } = await sdk.store.cart.createLineItem(
                 cart.id,
                 {
                     variant_id: variantId,
                     quantity,
+                },
+                {},
+                {
+                    fields: "+items.variant,+items.variant.options,+items.variant.product.images,+items.product.images",
                 }
             );
             setCart(updatedCart);
         } catch (error) {
             console.error("Failed to add item to cart:", error);
             throw error;
-        } finally {
-            setIsUpdating(false);
         }
     };
 
     const removeItem = async (lineItemId: string) => {
         if (!cart) return;
 
-        setIsUpdating(true);
+        setUpdatingItems((prev) => [...prev, lineItemId]);
         try {
             await sdk.store.cart.deleteLineItem(cart.id, lineItemId);
-            const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id);
+            const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id, {
+                fields: "+items.variant,+items.variant.options,+items.variant.product.images,+items.product.images",
+            });
             setCart(updatedCart);
         } catch (error) {
             console.error("Failed to remove item from cart:", error);
             throw error;
         } finally {
-            setIsUpdating(false);
+            setUpdatingItems((prev) => prev.filter((id) => id !== lineItemId));
         }
     };
 
     const updateItemQuantity = async (lineItemId: string, quantity: number) => {
         if (!cart) return;
 
-        setIsUpdating(true);
+        setUpdatingItems((prev) => [...prev, lineItemId]);
         try {
             const { cart: updatedCart } = await sdk.store.cart.updateLineItem(
                 cart.id,
                 lineItemId,
-                { quantity }
+                { quantity },
+                {},
+                {
+                    fields: "+items.variant,+items.variant.options,+items.variant.product.images,+items.product.images",
+                }
             );
             setCart(updatedCart);
         } catch (error) {
             console.error("Failed to update item quantity:", error);
             throw error;
         } finally {
-            setIsUpdating(false);
+            setUpdatingItems((prev) => prev.filter((id) => id !== lineItemId));
         }
     };
 
@@ -128,16 +145,18 @@ export const useCartState = () => {
         await fetchCart(regionId);
     };
 
+    const isItemUpdating = (itemId: string) => updatingItems.includes(itemId);
+
     return {
         cart,
         isLoading,
-        isUpdating,
         itemCount,
         fetchCart,
         addItem,
         removeItem,
         updateItemQuantity,
         refreshCart,
+        isItemUpdating,
     };
 };
 
@@ -145,8 +164,13 @@ export const useCartState = () => {
 export const useCart = () => {
     const cart = useRecoilValue(cartAtom);
     const isLoading = useRecoilValue(cartLoadingAtom);
-    const isUpdating = useRecoilValue(cartUpdatingAtom);
+    const updatingItems = useRecoilValue(cartUpdatingAtom);
     const itemCount = useRecoilValue(cartItemCountSelector);
 
-    return { cart, isLoading, isUpdating, itemCount };
+    return {
+        cart,
+        isLoading,
+        itemCount,
+        isItemUpdating: (itemId: string) => updatingItems.includes(itemId)
+    };
 };
